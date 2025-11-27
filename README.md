@@ -1,54 +1,130 @@
 # Task Nudge
 
-Помогает разработчикам оставаться на правильном пути, отправляя периодические напоминания в моменты неактивности.
+An AI-powered developer productivity assistant that helps you stay on track with periodic check-ins, voice feedback, and Git analysis.
 
-## Описание
+## Features
 
-**Task Nudge** — это расширение для VS Code, которое отслеживает активность разработчика и показывает диалоги с вопросами в периоды неактивности. Расширение адаптирует частоту напоминаний в зависимости от типа текущих блокировок (ожидание ответа от коллег, процессов и т.д.).
+### 🔔 Smart Nudges
+- Periodic check-ins during periods of inactivity
+- Adaptive intervals based on your progress
+- Configurable timing and questions
 
-## Основные возможности
+### 🤖 AI Integration
+- OpenAI GPT-powered personalized messages
+- Context-aware responses based on your Git activity
+- Encouraging feedback and helpful suggestions
 
-- **Отслеживание активности**: Мониторинг изменений текста, выделений и переключений между файлами
-- **Умные интервалы**: Автоматическая адаптация частоты напоминаний на основе типа блокировок
-- **Интеграция с Git**: Показ контекста изменённых файлов в диалогах
-- **Гибкие настройки**: Настройка вопросов, интервалов и порогов неактивности
-- **Состояние сессии**: Сохранение контекста между перезапусками редактора
+### 🗣️ Voice Synthesis
+- Text-to-speech using OpenAI's TTS API
+- Supports multiple languages (Russian and English)
+- Optional voice narration of all messages
 
-## Настройки
+### 📊 Git Analysis
+- Tracks changes between check-ins
+- Detects when you're stuck (no progress)
+- Detailed diff analysis with file-level statistics
+- Expandable Git analysis in chat interface
 
-Все настройки доступны в `Settings` > `Extensions` > `Task Nudge`:
+### 💬 AI Chat Assistant
+- Sidebar chat panel for ongoing assistance
+- Ask questions about your tasks
+- Get help when answering "don't know" to surveys
+- Persistent chat history during VS Code session
 
-- `taskNudge.enabled` - Включить/отключить расширение
-- `taskNudge.baseIntervalMinutes` - Базовый интервал между напоминаниями (по умолчанию: 15 мин)
-- `taskNudge.maxIntervalMinutes` - Максимальный интервал (по умолчанию: 60 мин)
-- `taskNudge.idleThresholdSeconds` - Порог неактивности в секундах (по умолчанию: 180 сек)
-- `taskNudge.questionsEnabled.*` - Включение/отключение отдельных вопросов
+## Setup
 
-## Команды
+1. Install the extension
+2. Configure your OpenAI API key in VS Code settings
+3. Customize nudge intervals and questions to your preference
 
-- `Task Nudge: Check Now` - Немедленно показать диалог напоминания
+### Required Settings
 
-## Как это работает
+- **OpenAI API Key**: Get one from [OpenAI Platform](https://platform.openai.com/api-keys)
 
-1. **Отслеживание активности**: Расширение отслеживает действия пользователя в редакторе
-2. **Детекция неактивности**: После периода бездействия (по умолчанию 3 минуты) запускается таймер
-3. **Показ диалога**: Через настроенный интервал показывается диалог с вопросами
-4. **Анализ ответов**: На основе ответов (особенно типа блокировки) корректируется следующий интервал
-5. **Адаптация**: Если разработчик ждёт ответа от коллег, интервал увеличивается
+### Optional Settings
 
-## Типы блокировок
+- **Base Interval**: Time between nudges (default: 15 minutes)
+- **Max Interval**: Maximum time between nudges (default: 60 minutes)
+- **Idle Threshold**: Seconds of inactivity before considering you idle (default: 180)
+- **Voice Enabled**: Enable text-to-speech (default: true)
+- **Voice Language**: Language for voice synthesis (default: ru)
+- **Questions**: Customize the questions asked during check-ins
 
-- **Ничего не блокирует** - стандартный интервал
-- **Жду ответа от коллег** - увеличенный интервал
-- **Жду процессы/системы** - увеличенный интервал
-- **Другое** - возможность указать детали
+## Usage
 
-## Разработка
+1. **Automatic Nudges**: The extension automatically tracks your activity and sends nudges when you're inactive
+2. **Manual Check**: Use `Ctrl+Shift+P` → "Task Nudge: Check Now" for immediate survey
+3. **Chat Interface**: Click the Task Nudge icon in the activity bar to open the AI chat
+4. **Git Analysis**: View detailed Git changes in expandable sections within the chat
 
-### Требования
+## How It Works
 
-- Node.js 16+
-- VS Code 1.106.1+
+### Activity Tracking
+- Monitors text changes, cursor movements, and file switches
+- Calculates idle time based on your activity patterns
+- Adapts nudge frequency based on detected progress
+
+### Progress Detection
+- Compares Git state between check-ins
+- Identifies when you're stuck (same files, no new changes)
+- Provides contextual messages based on your current work
+
+### AI Integration
+- Generates personalized opening messages based on Git analysis
+- Analyzes your survey responses for encouraging feedback
+- Provides ongoing chat support for questions and guidance
+
+## Extension Settings
+
+This extension contributes the following settings:
+
+- `taskNudge.enabled`: Enable developer pings during periods of inactivity
+- `taskNudge.baseIntervalMinutes`: Base interval between pings (in minutes)
+- `taskNudge.maxIntervalMinutes`: Maximum interval between pings (in minutes)
+- `taskNudge.idleThresholdSeconds`: How many seconds without activity to consider idle
+- `taskNudge.openaiApiKey`: OpenAI API key for generating personalized messages
+- `taskNudge.voiceEnabled`: Enable voice narration of messages
+- `taskNudge.voiceLanguage`: Language for voice narration (ru/en)
+- `taskNudge.questions`: Customize the questions asked during check-ins
+
+## Requirements
+
+- VS Code 1.105.0 or higher
+- OpenAI API key (for full functionality)
+- Git repository (for Git analysis features)
+
+## Privacy
+
+- Your code and responses are sent to OpenAI for AI features
+- Git analysis happens locally, only metadata is processed
+- No data is stored outside your local VS Code workspace
+- API communications are encrypted via HTTPS
+
+## Known Issues
+
+- Voice synthesis requires internet connection
+- Git analysis requires a valid Git repository
+- Some features may not work in remote workspaces
+
+## Release Notes
+
+### 1.0.0
+
+Initial release of Task Nudge with full feature set:
+- AI-powered nudges with OpenAI integration
+- Voice synthesis support
+- Git progress tracking and analysis
+- Interactive chat interface
+- Expandable Git diff analysis
+- English interface
+
+## Contributing
+
+Found a bug or have a feature request? Please open an issue on GitHub.
+
+## License
+
+MIT License
 
 ### Установка зависимостей
 

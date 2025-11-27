@@ -4,6 +4,7 @@ import { GitManager } from './git';
 import { DialogManager } from './dialog';
 import { StateManager } from './state';
 import { GitSnapshotManager } from './gitSnapshot';
+import { ChatViewProvider } from './chatViewProvider';
 import { SessionState } from './types';
 
 /**
@@ -15,18 +16,18 @@ export class TaskNudgeExtension {
   private gitSnapshotManager: GitSnapshotManager;
   private dialogManager: DialogManager;
   private sessionState: SessionState;
-  
+
   private activityCheckInterval: NodeJS.Timeout | undefined;
   private pingTimeout: NodeJS.Timeout | undefined;
   private disposables: vscode.Disposable[] = [];
 
-  constructor(context: vscode.ExtensionContext) {
+  constructor(context: vscode.ExtensionContext, chatViewProvider?: ChatViewProvider) {
     this.stateManager = new StateManager(context);
     this.gitManager = new GitManager();
     this.gitSnapshotManager = new GitSnapshotManager(context, this.gitManager);
-    this.dialogManager = new DialogManager();
+    this.dialogManager = new DialogManager(context, chatViewProvider);
     this.sessionState = this.stateManager.loadState();
-    
+
     this.initialize();
   }
 
@@ -116,7 +117,7 @@ export class TaskNudgeExtension {
    */
   private checkForIdlePeriod(): void {
     const config = ConfigManager.getConfig();
-    
+
     if (!config.enabled) {
       return;
     }
@@ -135,7 +136,7 @@ export class TaskNudgeExtension {
    */
   private schedulePing(): void {
     this.sessionState.pingScheduledAt = Date.now() + this.sessionState.currentIntervalMs;
-    
+
     this.pingTimeout = setTimeout(() => {
       this.showPing();
     }, this.sessionState.currentIntervalMs);
@@ -164,25 +165,26 @@ export class TaskNudgeExtension {
 
     try {
       const config = ConfigManager.getConfig();
-      
+
       // Analyze Git changes since last ping
       const gitAnalysis = await this.gitSnapshotManager.compareWithLast();
-      
+
       // Show dialog with voice and ChatGPT integration
       const dialogResult = await this.dialogManager.showPingDialog(config, {
         isStuck: gitAnalysis.isStuck,
         description: gitAnalysis.description,
-        hasChanges: gitAnalysis.hasChanges
+        hasChanges: gitAnalysis.hasChanges,
+        detailedInfo: gitAnalysis.detailedInfo
       });
-      
+
       if (dialogResult) {
         // Update session state with results
         this.stateManager.updateStateFromDialog(this.sessionState, dialogResult);
         await this.stateManager.saveState(this.sessionState);
-        
+
         // Save current Git snapshot for next comparison
         await this.gitSnapshotManager.saveCurrentSnapshot();
-        
+
         console.log(`Updated session state. New interval: ${this.sessionState.currentIntervalMs / 1000}s, Waiting: ${this.sessionState.isWaiting}`);
       }
     } catch (error) {
@@ -221,8 +223,14 @@ export class TaskNudgeExtension {
 let taskNudgeExtension: TaskNudgeExtension | undefined;
 
 export function activate(context: vscode.ExtensionContext) {
-  // Create extension instance
-  taskNudgeExtension = new TaskNudgeExtension(context);
+  // Register chat view provider
+  const chatViewProvider = new ChatViewProvider(context.extensionUri, context);
+  context.subscriptions.push(
+    vscode.window.registerWebviewViewProvider('task-nudge-chat-view', chatViewProvider)
+  );
+
+  // Create extension instance with chat provider
+  taskNudgeExtension = new TaskNudgeExtension(context, chatViewProvider);
 
   // Register command for manual ping
   const checkNowCommand = vscode.commands.registerCommand('task-nudge.checkNow', () => {
@@ -230,7 +238,7 @@ export function activate(context: vscode.ExtensionContext) {
   });
 
   context.subscriptions.push(checkNowCommand);
-  
+
   // Ensure cleanup on deactivation
   context.subscriptions.push({
     dispose: () => {

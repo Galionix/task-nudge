@@ -60,7 +60,7 @@ export class VoiceManager {
       body: JSON.stringify({
         model: 'tts-1',
         input: text,
-        voice: language === 'ru' ? 'alloy' : 'alloy', // OpenAI voices work for both languages
+        voice: 'alloy', // OpenAI voices work for both languages
         response_format: 'mp3',
         speed: 1.0
       })

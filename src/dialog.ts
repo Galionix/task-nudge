@@ -2,6 +2,7 @@ import * as vscode from 'vscode';
 import { ExtensionConfig, QuestionDialogResult, BlockerType } from './types';
 import { OpenAIManager } from './openai';
 import { VoiceManager } from './voice';
+import { ChatViewProvider } from './chatViewProvider';
 
 /**
  * Dialog manager for user interaction with voice and ChatGPT integration
@@ -9,10 +10,14 @@ import { VoiceManager } from './voice';
 export class DialogManager {
   private openaiManager: OpenAIManager;
   private voiceManager: VoiceManager;
+  private context: vscode.ExtensionContext;
+  private chatViewProvider: ChatViewProvider | undefined;
 
-  constructor() {
+  constructor(context: vscode.ExtensionContext, chatViewProvider?: ChatViewProvider) {
     this.openaiManager = new OpenAIManager(''); // Will be set from config
     this.voiceManager = new VoiceManager();
+    this.context = context;
+    this.chatViewProvider = chatViewProvider;
   }
 
   /**
@@ -32,6 +37,7 @@ export class DialogManager {
       isStuck: boolean;
       description: string;
       hasChanges: boolean;
+      detailedInfo?: string;
     }
   ): Promise<QuestionDialogResult | undefined> {
 
@@ -48,15 +54,30 @@ export class DialogManager {
 
     // Show confirmation dialog with the generated message
     const response = await vscode.window.showInformationMessage(
-      `${openingMessage}\n\nОтветишь на пару вопросов?`,
+      `${openingMessage}\n\nWould you like to answer a few questions?`,
       { modal: false },
-      'Да, отвечу',
-      'Отложить на 15 мин',
-      'Отключить на час'
+      'Yes, I will answer',
+      'Postpone for 15 min',
+      'Disable for 1 hour'
     );
 
-    if (!response || response !== 'Да, отвечу') {
+    if (!response || response !== 'Yes, I will answer') {
       return undefined;
+    }
+
+    // Show sidebar chat panel
+    await vscode.commands.executeCommand('workbench.view.extension.task-nudge-sidebar');
+
+    // Update OpenAI key in chat provider and show analysis there
+    if (this.chatViewProvider) {
+      this.chatViewProvider.updateOpenAIKey(config.openaiApiKey);
+
+      if (gitAnalysis.detailedInfo) {
+        await this.chatViewProvider.addCollapsibleMessage(
+          '📊 Git Analysis (comparison with previous survey)',
+          gitAnalysis.detailedInfo
+        );
+      }
     }
 
     // Ask questions in chat-like interface
@@ -75,28 +96,55 @@ export class DialogManager {
       answers,
       blockerType
     };
-  }
-
-  /**
-   * Ask questions in sequence using input boxes
+  }  /**
+   * Ask questions in sequence using input boxes with "Don't know" option
    */
   private async askQuestionsInSequence(questions: string[]): Promise<string[] | undefined> {
     const answers: string[] = [];
 
-    for (const question of questions) {
-      const answer = await vscode.window.showInputBox({
-        prompt: question,
-        placeHolder: 'Твой ответ...',
-        ignoreFocusOut: true,
-        value: '' // Start with empty input
+    for (let i = 0; i < questions.length; i++) {
+      const question = questions[i];
+
+      // Show question with buttons for "Don't know"
+      const choice = await vscode.window.showQuickPick([
+        {
+          label: '✍️ Type answer',
+          detail: 'I know the answer to this question',
+          action: 'input'
+        },
+        {
+          label: '🤷 Don\'t know',
+          detail: 'I\'m not sure how to answer this question',
+          action: 'unknown'
+        }
+      ], {
+        placeHolder: question,
+        ignoreFocusOut: true
       });
 
-      if (answer === undefined) {
+      if (!choice) {
         // User cancelled
         return undefined;
       }
 
-      answers.push(answer || '(пропущено)');
+      if (choice.action === 'unknown') {
+        answers.push('Don\'t know');
+      } else {
+        // Ask for detailed answer
+        const answer = await vscode.window.showInputBox({
+          prompt: question,
+          placeHolder: 'Your answer...',
+          ignoreFocusOut: true,
+          value: ''
+        });
+
+        if (answer === undefined) {
+          // User cancelled
+          return undefined;
+        }
+
+        answers.push(answer || '(пропущено)');
+      }
     }
 
     return answers;
@@ -136,18 +184,23 @@ export class DialogManager {
   }
 
   /**
-   * Analyze answers and provide encouraging response
+   * Analyze answers and provide encouraging response with chat integration
    */
   private async analyzeAndEncourage(config: ExtensionConfig, answers: string[]): Promise<void> {
-    // Debug output: show developer's answers
-    const outputChannel = vscode.window.createOutputChannel('Task Nudge Debug');
-    outputChannel.show(true);
-    outputChannel.appendLine(`=== Ответы разработчика [${new Date().toLocaleTimeString()}] ===`);
+    // Show chat panel
+    await vscode.commands.executeCommand('workbench.view.extension.task-nudge-sidebar');
 
-    for (let i = 0; i < config.questions.length && i < answers.length; i++) {
-      outputChannel.appendLine(`Q: ${config.questions[i]}`);
-      outputChannel.appendLine(`A: ${answers[i]}`);
-      outputChannel.appendLine('');
+    // Update OpenAI key in chat provider
+    if (this.chatViewProvider) {
+      this.chatViewProvider.updateOpenAIKey(config.openaiApiKey);
+
+      // Add debug output to chat: show developer's answers
+      await this.chatViewProvider.addSystemMessage('=== Survey Results ===');
+
+      for (let i = 0; i < config.questions.length && i < answers.length; i++) {
+        await this.chatViewProvider.addDebugMessage(`Q: ${config.questions[i]}`);
+        await this.chatViewProvider.addDebugMessage(`A: ${answers[i]}`);
+      }
     }
 
     // Generate encouraging response
@@ -161,18 +214,24 @@ export class DialogManager {
       await this.voiceManager.speakEncouragement(encouragement, config.voiceLanguage);
     }
 
-    // Also show as notification for visibility
-    await vscode.window.showInformationMessage(
-      `💪 ${encouragement}`,
-      { modal: false }
-    );
+    // Add AI response to chat
+    if (this.chatViewProvider) {
+      await this.chatViewProvider.addAssistantMessage(encouragement);
 
-    // Debug output: show AI response
-    outputChannel.appendLine(`AI Encouragement: ${encouragement}`);
-    outputChannel.appendLine('='.repeat(50));
-  }
+      // Check for "don't know" answers and provide additional help
+      const unknownCount = answers.filter(answer =>
+        answer.toLowerCase().includes('don\'t know') ||
+        answer === '(skipped)'
+      ).length;
 
-  /**
+      if (unknownCount > 0) {
+        const helpMessage = `I see that you answered "don't know" to ${unknownCount} question(s). Feel free to ask questions in the chat - I'll help you figure it out! 💪`;
+        await this.chatViewProvider.addSystemMessage(helpMessage);
+      } else {
+        await this.chatViewProvider.addSystemMessage('Great answers! If you have any questions - just chat with me.');
+      }
+    }
+  }  /**
    * Show a simple notification
    */
   async showNotification(message: string, type: 'info' | 'warning' | 'error' = 'info'): Promise<void> {

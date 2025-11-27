@@ -1,13 +1,56 @@
 {
   "name": "task-nudge",
   "displayName": "Task Nudge",
-  "description": "Helps developers stay on track by sending periodic nudges during periods of inactivity",
-  "version": "0.0.1",
+  "description": "AI-powered developer productivity assistant with periodic check-ins, voice feedback, and Git analysis",
+  "version": "1.0.0",
+  "publisher": "Galionix",
+  "author": {
+    "name": "Galionix"
+  },
+  "license": "MIT",
+  "keywords": [
+    "productivity",
+    "developer",
+    "ai",
+    "assistant",
+    "nudge",
+    "git",
+    "voice",
+    "openai",
+    "chatgpt",
+    "workflow",
+    "tracking",
+    "automation",
+    "reminder",
+    "notification",
+    "progress",
+    "coaching",
+    "mentoring",
+    "focus",
+    "time-management",
+    "developer-tools",
+    "code-review",
+    "machine-learning",
+    "text-to-speech",
+    "tts",
+    "collaboration",
+    "team",
+    "survey",
+    "check-in",
+    "feedback",
+    "motivation",
+    "health",
+    "wellbeing",
+    "pomodoro",
+    "break-reminder",
+    "activity-tracker"
+  ],
   "engines": {
     "vscode": "^1.105.0"
   },
   "categories": [
-    "Other"
+    "Other",
+    "Machine Learning"
   ],
   "activationEvents": [],
   "main": "./dist/extension.js",
@@ -17,33 +60,58 @@
         "command": "task-nudge.checkNow",
         "title": "Task Nudge: Check Now",
         "category": "Task Nudge"
+      },
+      {
+        "command": "task-nudge.openChat",
+        "title": "Open Chat",
+        "icon": "$(comment-discussion)"
       }
     ],
+    "views": {
+      "task-nudge-sidebar": [
+        {
+          "id": "task-nudge-chat-view",
+          "name": "AI Assistant",
+          "type": "webview",
+          "when": "true",
+          "icon": "$(comment-discussion)"
+        }
+      ]
+    },
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "task-nudge-sidebar",
+          "title": "Task Nudge",
+          "icon": "$(pulse)"
+        }
+      ]
+    },
     "configuration": {
       "title": "Task Nudge",
       "properties": {
         "taskNudge.enabled": {
           "type": "boolean",
           "default": true,
-          "description": "Включить пинги разработчика в периоды неактивности."
+          "description": "Enable developer pings during periods of inactivity."
         },
         "taskNudge.baseIntervalMinutes": {
           "type": "number",
           "default": 15,
           "minimum": 1,
-          "description": "Базовый интервал между пингами (в минутах)."
+          "description": "Base interval between pings (in minutes)."
         },
         "taskNudge.maxIntervalMinutes": {
           "type": "number",
           "default": 60,
           "minimum": 5,
-          "description": "Максимальный интервал между пингами (в минутах)."
+          "description": "Maximum interval between pings (in minutes)."
         },
         "taskNudge.idleThresholdSeconds": {
           "type": "number",
           "default": 180,
           "minimum": 30,
-          "description": "Сколько секунд без активности считать неактивностью."
+          "description": "How many seconds without activity to consider idle."
         },
         "taskNudge.questions": {
           "type": "array",
@@ -51,29 +119,30 @@
             "type": "string"
           },
           "default": [
-            "Над какой задачей ты сейчас работаешь?",
-            "Что тебя сейчас блокирует или затрудняет?",
-            "Какой следующий шаг ты планируешь?",
-            "К кому можешь обратиться за помощью?",
-            "Сколько времени, по твоей оценке, займёт текущая задача?"
+            "What task are you currently working on?",
+            "How is your mood today?",
+            "What is blocking or challenging you right now?",
+            "What is your next planned step?",
+            "Who can you reach out to for help?",
+            "How much time do you estimate the current task will take?"
           ],
-          "description": "Список вопросов, которые будут заданы разработчику."
+          "description": "List of questions to ask the developer."
         },
         "taskNudge.openaiApiKey": {
           "type": "string",
           "default": "",
-          "description": "API ключ OpenAI для генерации персонализированных сообщений."
+          "description": "OpenAI API key for generating personalized messages."
         },
         "taskNudge.voiceEnabled": {
           "type": "boolean",
           "default": true,
-          "description": "Включить голосовое озвучивание сообщений."
+          "description": "Enable voice narration of messages."
         },
         "taskNudge.voiceLanguage": {
           "type": "string",
           "enum": ["ru", "en"],
           "default": "ru",
-          "description": "Язык для голосового озвучивания."
+          "description": "Language for voice narration."
         }
       }
     }

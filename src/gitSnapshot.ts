@@ -56,17 +56,21 @@ export class GitSnapshotManager {
     changedFilesSinceLastPing: string[];
     isStuck: boolean; // true если diff не изменился с последнего раза
     description: string;
+    detailedInfo: string; // Детальная информация о сравнении
   }> {
     const currentSnapshot = await this.getCurrentSnapshot();
     const lastSnapshot = this.getLastSnapshot();
 
     if (!lastSnapshot) {
+      const detailedInfo = `Первый анализ Git состояния:\n- Файлов изменено: ${currentSnapshot.changedFiles.length}\n- Список: ${currentSnapshot.changedFiles.join(', ') || 'нет изменений'}`;
+
       return {
         hasChanges: currentSnapshot.changedFiles.length > 0,
         newFiles: currentSnapshot.changedFiles,
         changedFilesSinceLastPing: [],
         isStuck: false,
-        description: currentSnapshot.summary
+        description: currentSnapshot.summary,
+        detailedInfo
       };
     }
 
@@ -75,15 +79,67 @@ export class GitSnapshotManager {
     const currentFiles = new Set(currentSnapshot.changedFiles);
 
     const newFiles = currentSnapshot.changedFiles.filter(file => !lastFiles.has(file));
+    const removedFiles = lastSnapshot.changedFiles.filter(file => !currentFiles.has(file));
     const isStuck = this.arraysEqual(lastSnapshot.changedFiles, currentSnapshot.changedFiles);
+
+    // Строим детальную информацию
+    let detailedInfo = `📊 Change Statistics:\n`;
+    detailedInfo += `• Files in diff before: ${lastSnapshot.changedFiles.length}\n`;
+    detailedInfo += `• Files in diff now: ${currentSnapshot.changedFiles.length}\n\n`;
+
+    if (newFiles.length > 0) {
+      detailedInfo += `✅ New changes (${newFiles.length}):\n`;
+      newFiles.forEach(file => {
+        detailedInfo += `  • ${file}\n`;
+      });
+      detailedInfo += '\n';
+    }
+
+    if (removedFiles.length > 0) {
+      detailedInfo += `❌ Removed from diff (${removedFiles.length}):\n`;
+      removedFiles.forEach(file => {
+        detailedInfo += `  • ${file}\n`;
+      });
+      detailedInfo += '\n';
+    }
+
+    if (currentSnapshot.changedFiles.length > 0 && newFiles.length === 0 && removedFiles.length === 0) {
+      detailedInfo += `📝 Same files as before:\n`;
+      currentSnapshot.changedFiles.forEach(file => {
+        detailedInfo += `  • ${file}\n`;
+      });
+      detailedInfo += '\n';
+    }
+
+    if (isStuck) {
+      detailedInfo += `⚠️ STATUS: Same changes, no progress`;
+    } else {
+      detailedInfo += `✅ STATUS: Progress detected!`;
+    }
+
+    detailedInfo += `\n\n🕐 Last survey time: ${new Date(lastSnapshot.timestamp).toLocaleString()}`;
+
+    if (currentSnapshot.summary) {
+      detailedInfo += `\n\n📋 Brief description: ${currentSnapshot.summary}`;
+    }
+
+    // Добавляем детальный diff
+    try {
+      const detailedDiff = await this.gitManager.getDetailedDiff();
+      if (detailedDiff && detailedDiff !== 'No changes to display.' && detailedDiff !== 'Could not get detailed diff.') {
+        detailedInfo += `\n\n🔍 Detailed changes:\n${detailedDiff}`;
+      }
+    } catch (error) {
+      console.warn('Failed to get detailed diff for snapshot:', error);
+    }
 
     let description = '';
     if (isStuck && currentSnapshot.changedFiles.length === 0) {
-      description = 'Никаких изменений с последнего раза. Возможно, ты застрял?';
+      description = 'No changes since last time. Are you stuck?';
     } else if (isStuck && currentSnapshot.changedFiles.length > 0) {
-      description = `Те же файлы что и в прошлый раз: ${currentSnapshot.summary}. Продвижения не видно.`;
+      description = `Same files as last time: ${currentSnapshot.summary}. No progress visible.`;
     } else if (newFiles.length > 0) {
-      description = `Новые изменения: ${newFiles.join(', ')}. ${currentSnapshot.summary}`;
+      description = `New changes: ${newFiles.join(', ')}. ${currentSnapshot.summary}`;
     } else {
       description = currentSnapshot.summary;
     }
@@ -93,11 +149,10 @@ export class GitSnapshotManager {
       newFiles,
       changedFilesSinceLastPing: newFiles,
       isStuck,
-      description
+      description,
+      detailedInfo
     };
-  }
-
-  /**
+  }  /**
    * Helper to compare arrays
    */
   private arraysEqual(a: string[], b: string[]): boolean {
