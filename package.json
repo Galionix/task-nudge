@@ -1,0 +1,100 @@
+{
+  "name": "task-nudge",
+  "displayName": "Task Nudge",
+  "description": "Helps developers stay on track by sending periodic nudges during periods of inactivity",
+  "version": "0.0.1",
+  "engines": {
+    "vscode": "^1.105.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [],
+  "main": "./dist/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "task-nudge.checkNow",
+        "title": "Task Nudge: Check Now",
+        "category": "Task Nudge"
+      }
+    ],
+    "configuration": {
+      "title": "Task Nudge",
+      "properties": {
+        "taskNudge.enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Включить пинги разработчика в периоды неактивности."
+        },
+        "taskNudge.baseIntervalMinutes": {
+          "type": "number",
+          "default": 15,
+          "minimum": 1,
+          "description": "Базовый интервал между пингами (в минутах)."
+        },
+        "taskNudge.maxIntervalMinutes": {
+          "type": "number",
+          "default": 60,
+          "minimum": 5,
+          "description": "Максимальный интервал между пингами (в минутах)."
+        },
+        "taskNudge.idleThresholdSeconds": {
+          "type": "number",
+          "default": 180,
+          "minimum": 30,
+          "description": "Сколько секунд без активности считать неактивностью."
+        },
+        "taskNudge.questionsEnabled.task": {
+          "type": "boolean",
+          "default": true,
+          "description": "Спрашивать про задачу / тикет."
+        },
+        "taskNudge.questionsEnabled.unclear": {
+          "type": "boolean",
+          "default": true,
+          "description": "Спрашивать, что непонятно."
+        },
+        "taskNudge.questionsEnabled.tried": {
+          "type": "boolean",
+          "default": true,
+          "description": "Спрашивать, что уже пробовал."
+        },
+        "taskNudge.questionsEnabled.teammate": {
+          "type": "boolean",
+          "default": true,
+          "description": "Спрашивать, к кому из команды можно обратиться."
+        },
+        "taskNudge.questionsEnabled.blocker": {
+          "type": "boolean",
+          "default": true,
+          "description": "Спрашивать, что блокирует."
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run package",
+    "compile": "webpack",
+    "watch": "webpack --watch",
+    "package": "webpack --mode production --devtool hidden-source-map",
+    "compile-tests": "tsc -p . --outDir out",
+    "watch-tests": "tsc -p . -w --outDir out",
+    "pretest": "npm run compile-tests && npm run compile && npm run lint",
+    "lint": "eslint src",
+    "test": "vscode-test"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.105.0",
+    "@types/mocha": "^10.0.10",
+    "@types/node": "22.x",
+    "typescript-eslint": "^8.46.3",
+    "eslint": "^9.39.1",
+    "typescript": "^5.9.3",
+    "ts-loader": "^9.5.4",
+    "webpack": "^5.102.1",
+    "webpack-cli": "^6.0.1",
+    "@vscode/test-cli": "^0.0.12",
+    "@vscode/test-electron": "^2.5.2"
+  }
+}
