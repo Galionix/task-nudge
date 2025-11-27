@@ -26,7 +26,9 @@ export class StateManager {
       maxIntervalMs: stored.maxIntervalMs || 60 * 60 * 1000, // 1 hour
       idleThresholdMs: stored.idleThresholdMs || 3 * 60 * 1000, // 3 minutes
       lastActivityAt: Date.now(),
-      pingScheduledAt: null
+      pingScheduledAt: null,
+      lastGitSnapshot: stored.lastGitSnapshot,
+      lastQuestionAnswers: stored.lastQuestionAnswers || []
     };
   }
 
@@ -45,7 +47,9 @@ export class StateManager {
       baseIntervalMs: state.baseIntervalMs,
       currentIntervalMs: state.currentIntervalMs,
       maxIntervalMs: state.maxIntervalMs,
-      idleThresholdMs: state.idleThresholdMs
+      idleThresholdMs: state.idleThresholdMs,
+      lastGitSnapshot: state.lastGitSnapshot,
+      lastQuestionAnswers: state.lastQuestionAnswers
     });
   }
 
@@ -53,22 +57,8 @@ export class StateManager {
    * Update state from dialog results
    */
   updateStateFromDialog(state: SessionState, dialogResult: QuestionDialogResult): void {
-    // Update answers
-    if (dialogResult.taskDescription !== undefined) {
-      state.lastTaskDescription = dialogResult.taskDescription;
-    }
-    if (dialogResult.unclear !== undefined) {
-      state.lastUnclear = dialogResult.unclear;
-    }
-    if (dialogResult.tried !== undefined) {
-      state.lastTried = dialogResult.tried;
-    }
-    if (dialogResult.teammate !== undefined) {
-      state.lastTeammate = dialogResult.teammate;
-    }
-    if (dialogResult.blocker !== undefined) {
-      state.lastBlocker = dialogResult.blocker;
-    }
+    // Save the answers
+    state.lastQuestionAnswers = dialogResult.answers;
 
     // Update blocker type and interval logic
     const wasWaiting = state.isWaiting;

@@ -22,6 +22,8 @@ export interface SessionState {
   idleThresholdMs: number;
   lastActivityAt: number;
   pingScheduledAt?: number | null;
+  lastGitSnapshot?: string; // JSON строка с предыдущим Git diff
+  lastQuestionAnswers?: string[]; // Ответы на последние вопросы
 }
 
 export interface ExtensionConfig {
@@ -29,20 +31,34 @@ export interface ExtensionConfig {
   baseIntervalMinutes: number;
   maxIntervalMinutes: number;
   idleThresholdSeconds: number;
-  questionsEnabled: {
-    task: boolean;
-    unclear: boolean;
-    tried: boolean;
-    teammate: boolean;
-    blocker: boolean;
-  };
+  questions: string[]; // Список настраиваемых вопросов
+  openaiApiKey: string;
+  voiceEnabled: boolean;
+  voiceLanguage: 'ru' | 'en';
 }
 
 export interface QuestionDialogResult {
-  taskDescription?: string;
-  unclear?: string;
-  tried?: string;
-  teammate?: string;
-  blocker?: string;
+  answers: string[]; // Ответы на вопросы
   blockerType: BlockerType;
+}
+
+export interface GitSnapshot {
+  timestamp: number;
+  changedFiles: string[];
+  additions: number;
+  deletions: number;
+  summary: string; // Краткое описание изменений
+}
+
+export interface OpenAIMessage {
+  role: 'system' | 'user' | 'assistant';
+  content: string;
+}
+
+export interface VoiceOptions {
+  text: string;
+  language: 'ru' | 'en';
+  rate?: number;
+  pitch?: number;
+  volume?: number;
 }

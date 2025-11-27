@@ -18,13 +18,16 @@ export class ConfigManager {
       baseIntervalMinutes: config.get('baseIntervalMinutes', 15),
       maxIntervalMinutes: config.get('maxIntervalMinutes', 60),
       idleThresholdSeconds: config.get('idleThresholdSeconds', 180),
-      questionsEnabled: {
-        task: config.get('questionsEnabled.task', true),
-        unclear: config.get('questionsEnabled.unclear', true),
-        tried: config.get('questionsEnabled.tried', true),
-        teammate: config.get('questionsEnabled.teammate', true),
-        blocker: config.get('questionsEnabled.blocker', true),
-      }
+      questions: config.get('questions', [
+        'Над какой задачей ты сейчас работаешь?',
+        'Что тебя сейчас блокирует или затрудняет?',
+        'Какой следующий шаг ты планируешь?',
+        'К кому можешь обратиться за помощью?',
+        'Сколько времени, по твоей оценке, займёт текущая задача?'
+      ]),
+      openaiApiKey: config.get('openaiApiKey', ''),
+      voiceEnabled: config.get('voiceEnabled', true),
+      voiceLanguage: config.get('voiceLanguage', 'ru')
     };
   }
 

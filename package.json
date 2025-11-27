@@ -45,30 +45,35 @@
           "minimum": 30,
           "description": "Сколько секунд без активности считать неактивностью."
         },
-        "taskNudge.questionsEnabled.task": {
-          "type": "boolean",
-          "default": true,
-          "description": "Спрашивать про задачу / тикет."
+        "taskNudge.questions": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [
+            "Над какой задачей ты сейчас работаешь?",
+            "Что тебя сейчас блокирует или затрудняет?",
+            "Какой следующий шаг ты планируешь?",
+            "К кому можешь обратиться за помощью?",
+            "Сколько времени, по твоей оценке, займёт текущая задача?"
+          ],
+          "description": "Список вопросов, которые будут заданы разработчику."
         },
-        "taskNudge.questionsEnabled.unclear": {
-          "type": "boolean",
-          "default": true,
-          "description": "Спрашивать, что непонятно."
+        "taskNudge.openaiApiKey": {
+          "type": "string",
+          "default": "",
+          "description": "API ключ OpenAI для генерации персонализированных сообщений."
         },
-        "taskNudge.questionsEnabled.tried": {
+        "taskNudge.voiceEnabled": {
           "type": "boolean",
           "default": true,
-          "description": "Спрашивать, что уже пробовал."
+          "description": "Включить голосовое озвучивание сообщений."
         },
-        "taskNudge.questionsEnabled.teammate": {
-          "type": "boolean",
-          "default": true,
-          "description": "Спрашивать, к кому из команды можно обратиться."
-        },
-        "taskNudge.questionsEnabled.blocker": {
-          "type": "boolean",
-          "default": true,
-          "description": "Спрашивать, что блокирует."
+        "taskNudge.voiceLanguage": {
+          "type": "string",
+          "enum": ["ru", "en"],
+          "default": "ru",
+          "description": "Язык для голосового озвучивания."
         }
       }
     }
