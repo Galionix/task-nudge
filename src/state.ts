@@ -12,7 +12,7 @@ export class StateManager {
    */
   loadState(): SessionState {
     const stored = this.context.workspaceState.get<Partial<SessionState>>('taskNudge.sessionState', {});
-    
+
     return {
       lastTaskDescription: stored.lastTaskDescription,
       lastUnclear: stored.lastUnclear,

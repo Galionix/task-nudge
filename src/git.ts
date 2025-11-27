@@ -23,7 +23,7 @@ export class GitManager {
       if (this.gitExtension && this.gitExtension.isActive) {
         return await this.getChangedFilesFromExtension();
       }
-      
+
       // Fallback to command line git
       return await this.getChangedFilesFromCli();
     } catch (error) {
@@ -47,7 +47,7 @@ export class GitManager {
 
     const repo = git.repositories[0];
     const changes = repo.state.workingTreeChanges;
-    
+
     return changes.map((change: any) => change.uri.fsPath);
   }
 
@@ -61,12 +61,12 @@ export class GitManager {
     }
 
     const workspaceRoot = workspaceFolders[0].uri.fsPath;
-    
+
     try {
       const { stdout } = await execAsync('git diff --name-only HEAD', {
         cwd: workspaceRoot
       });
-      
+
       return stdout.trim().split('\n').filter(file => file.length > 0);
     } catch (error) {
       // Try staged and unstaged changes
@@ -77,10 +77,10 @@ export class GitManager {
         const { stdout: unstaged } = await execAsync('git diff --name-only', {
           cwd: workspaceRoot
         });
-        
+
         const stagedFiles = staged.trim().split('\n').filter(file => file.length > 0);
         const unstagedFiles = unstaged.trim().split('\n').filter(file => file.length > 0);
-        
+
         return [...new Set([...stagedFiles, ...unstagedFiles])];
       } catch (fallbackError) {
         return [];
@@ -93,15 +93,15 @@ export class GitManager {
    */
   async getChangedFilesDescription(): Promise<string> {
     const changedFiles = await this.getChangedFiles();
-    
+
     if (changedFiles.length === 0) {
       return 'Нет изменений в Git.';
     }
-    
+
     if (changedFiles.length <= 3) {
       return `Изменённые файлы: ${changedFiles.join(', ')}.`;
     }
-    
+
     return `Изменено ${changedFiles.length} файлов, включая: ${changedFiles.slice(0, 3).join(', ')} и другие.`;
   }
 }

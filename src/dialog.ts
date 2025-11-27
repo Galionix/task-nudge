@@ -94,7 +94,7 @@ export class DialogManager {
 
       if (blockerChoice) {
         result.blockerType = blockerChoice.blockerType;
-        
+
         // If "other" was selected, ask for details
         if (blockerChoice.blockerType === 'other') {
           result.blocker = await vscode.window.showInputBox({

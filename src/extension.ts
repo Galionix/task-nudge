@@ -13,7 +13,7 @@ export class TaskNudgeExtension {
   private gitManager: GitManager;
   private dialogManager: DialogManager;
   private sessionState: SessionState;
-  
+
   private activityCheckInterval: NodeJS.Timeout | undefined;
   private pingTimeout: NodeJS.Timeout | undefined;
   private disposables: vscode.Disposable[] = [];
@@ -23,7 +23,7 @@ export class TaskNudgeExtension {
     this.gitManager = new GitManager();
     this.dialogManager = new DialogManager(this.gitManager);
     this.sessionState = this.stateManager.loadState();
-    
+
     this.initialize();
   }
 
@@ -113,7 +113,7 @@ export class TaskNudgeExtension {
    */
   private checkForIdlePeriod(): void {
     const config = ConfigManager.getConfig();
-    
+
     if (!config.enabled) {
       return;
     }
@@ -132,7 +132,7 @@ export class TaskNudgeExtension {
    */
   private schedulePing(): void {
     this.sessionState.pingScheduledAt = Date.now() + this.sessionState.currentIntervalMs;
-    
+
     this.pingTimeout = setTimeout(() => {
       this.showPing();
     }, this.sessionState.currentIntervalMs);
@@ -162,13 +162,13 @@ export class TaskNudgeExtension {
     try {
       const config = ConfigManager.getConfig();
       const gitChanges = await this.gitManager.getChangedFilesDescription();
-      
+
       const dialogResult = await this.dialogManager.showPingDialog(config, gitChanges);
-      
+
       if (dialogResult) {
         this.stateManager.updateStateFromDialog(this.sessionState, dialogResult);
         await this.stateManager.saveState(this.sessionState);
-        
+
         console.log(`Updated session state. New interval: ${this.sessionState.currentIntervalMs / 1000}s, Waiting: ${this.sessionState.isWaiting}`);
       }
     } catch (error) {
@@ -216,7 +216,7 @@ export function activate(context: vscode.ExtensionContext) {
   });
 
   context.subscriptions.push(checkNowCommand);
-  
+
   // Ensure cleanup on deactivation
   context.subscriptions.push({
     dispose: () => {

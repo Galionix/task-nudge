@@ -12,7 +12,7 @@ export class ConfigManager {
    */
   static getConfig(): ExtensionConfig {
     const config = vscode.workspace.getConfiguration(this.CONFIG_SECTION);
-    
+
     return {
       enabled: config.get('enabled', true),
       baseIntervalMinutes: config.get('baseIntervalMinutes', 15),

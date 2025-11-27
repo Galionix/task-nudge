@@ -7,7 +7,7 @@ This project is a TypeScript-based VS Code extension that helps developers stay 
 ## Project Structure
 
 - `src/` - TypeScript source files
-- `package.json` - Extension manifest and dependencies  
+- `package.json` - Extension manifest and dependencies
 - `tsconfig.json` - TypeScript configuration
 - `webpack.config.js` - Build configuration
 - `.vscodeignore` - Files to exclude from extension package
@@ -31,7 +31,7 @@ This project is a TypeScript-based VS Code extension that helps developers stay 
 ## API Usage
 
 - Use `vscode.workspace.onDidChangeTextDocument` for text activity
-- Use `vscode.window.onDidChangeTextEditorSelection` for selection activity  
+- Use `vscode.window.onDidChangeTextEditorSelection` for selection activity
 - Use `vscode.extensions.getExtension('vscode.git')` for Git integration
 - Use `vscode.workspace.getConfiguration()` for settings
 
