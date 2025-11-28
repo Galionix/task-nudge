@@ -2,9 +2,20 @@
 
 All notable changes to the "task-nudge" extension will be documented in this file.
 
-Check [Keep a # Change Log
+Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
-All notable changes to the "task-nudge" extension will be documented in this file.
+## [1.0.1] - 2025-11-28
+
+### Enhanced
+- 🧠 **Improved AI Opening Messages**: AI now provides specific progress commentary based on Git analysis
+- 📝 **Progress-Aware Voice Messages**: Opening voice messages now include detailed progress analysis
+- 🔍 **Enhanced Git Analysis Integration**: AI comments directly on whether developer is stuck, making progress, or actively working
+
+### Technical Improvements
+- Added `buildOpeningPromptWithGitAnalysis` method for specialized progress-aware prompts
+- Enhanced opening message generation to include file count and change context
+- Improved AI prompt engineering for more accurate progress assessment
+- Better integration of Git diff data with AI message generation
 
 ## [1.0.0] - 2025-11-27
 

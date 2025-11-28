@@ -2,7 +2,7 @@
   "name": "task-nudge",
   "displayName": "Task Nudge",
   "description": "AI-powered developer productivity assistant with periodic check-ins, voice feedback, and Git analysis",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "publisher": "Galionix",
   "author": {
     "name": "Galionix"
@@ -91,7 +91,7 @@
         {
           "id": "task-nudge-sidebar",
           "title": "Task Nudge",
-          "icon": "$(pulse)"
+          "icon": "/media/icon.png"
         }
       ]
     },

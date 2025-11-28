@@ -174,6 +174,7 @@ export class TaskNudgeExtension {
         isStuck: gitAnalysis.isStuck,
         description: gitAnalysis.description,
         hasChanges: gitAnalysis.hasChanges,
+        newFiles: gitAnalysis.newFiles || [],
         detailedInfo: gitAnalysis.detailedInfo
       });
 

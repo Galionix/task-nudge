@@ -25,6 +25,8 @@ export class OpenAIManager {
     isStuck: boolean;
     description: string;
     hasChanges: boolean;
+    newFiles: string[];
+    detailedInfo?: string;
   }): Promise<string> {
     if (!this.isConfigured()) {
       // Fallback messages if no API key
@@ -37,9 +39,9 @@ export class OpenAIManager {
       }
     }
 
-    const prompt = this.buildOpeningPrompt(gitAnalysis);
+    const prompt = this.buildOpeningPromptWithGitAnalysis(gitAnalysis);
     const response = await this.callOpenAI([
-      { role: 'system', content: 'You are a friendly developer assistant. Speak briefly, in English, without formalities.' },
+      { role: 'system', content: 'You are a friendly developer coach. Comment on the developer\'s progress based on Git analysis. Be encouraging but honest about progress. Speak in English, keep it brief and personal.' },
       { role: 'user', content: prompt }
     ]);
 
@@ -121,6 +123,43 @@ export class OpenAIManager {
     basePrompt += '\n\nСообщение должно быть:\n- Дружелюбным\n- Мотивирующим\n- На русском языке\n- Без "я вижу что"\n- Максимум 2 предложения';
 
     return basePrompt;
+  }
+
+  /**
+   * Build prompt with detailed Git analysis for opening message
+   */
+  private buildOpeningPromptWithGitAnalysis(gitAnalysis: {
+    isStuck: boolean;
+    description: string;
+    hasChanges: boolean;
+    newFiles: string[];
+    detailedInfo?: string;
+  }): string {
+    let prompt = 'Generate a brief, encouraging message (1-2 sentences) for a developer based on their Git progress analysis:\n\n';
+
+    // Add progress context
+    if (gitAnalysis.isStuck && gitAnalysis.hasChanges) {
+      prompt += `🔄 STUCK: Developer is working on the same files with no progress. ${gitAnalysis.description}`;
+    } else if (gitAnalysis.newFiles.length > 0) {
+      prompt += `✅ PROGRESS: New changes detected in: ${gitAnalysis.newFiles.join(', ')}. ${gitAnalysis.description}`;
+    } else if (gitAnalysis.hasChanges) {
+      prompt += `📝 ACTIVE: Developer is making changes. ${gitAnalysis.description}`;
+    } else {
+      prompt += `💤 INACTIVE: No recent code changes detected.`;
+    }
+
+    // Add file count context if available
+    if (gitAnalysis.detailedInfo) {
+      const fileCountMatch = gitAnalysis.detailedInfo.match(/Files in diff now: (\d+)/);
+      if (fileCountMatch) {
+        const fileCount = fileCountMatch[1];
+        prompt += ` Currently ${fileCount} files in working state.`;
+      }
+    }
+
+    prompt += '\n\nGenerate a message that:\n- Comments specifically on their progress (stuck/progressing/active)\n- Is encouraging and supportive\n- Is personal and conversational\n- Uses English\n- Is maximum 2 sentences\n- Does NOT start with "I see that"';
+
+    return prompt;
   }
 
   /**

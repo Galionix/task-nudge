@@ -37,6 +37,7 @@ export class DialogManager {
       isStuck: boolean;
       description: string;
       hasChanges: boolean;
+      newFiles: string[];
       detailedInfo?: string;
     }
   ): Promise<QuestionDialogResult | undefined> {

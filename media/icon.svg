@@ -1,0 +1,35 @@
+<svg width="256" height="256" viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#020617"></stop>
+      <stop offset="100%" stop-color="#111827"></stop>
+    </linearGradient>
+    <linearGradient id="circle" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#22d3ee"></stop>
+      <stop offset="100%" stop-color="#3b82f6"></stop>
+    </linearGradient>
+  </defs>
+
+  <!-- background -->
+  <rect x="16" y="16" width="224" height="224" rx="56" fill="url(#bg)"></rect>
+
+  <!-- left sidebar (activity bar / panel) -->
+  <rect x="40" y="52" width="24" height="152" rx="10" fill="#020617" opacity="0.85"></rect>
+  <circle cx="52" cy="76" r="5" fill="#22c55e"></circle>
+  <circle cx="52" cy="106" r="5" fill="#facc15"></circle>
+  <circle cx="52" cy="136" r="5" fill="#f97316"></circle>
+
+  <!-- main nudge circle -->
+  <circle cx="156" cy="128" r="70" fill="url(#circle)"></circle>
+
+  <!-- checkmark -->
+  <path d="M126 129l18 18 34-40" fill="none" stroke="#f9fafb" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"></path>
+
+  <!-- subtle nudge lines -->
+  <path d="M156 46v18" stroke="#e0f2fe" stroke-width="6" stroke-linecap="round" opacity="0.9"></path>
+  <path d="M206 64l-10 14" stroke="#e0f2fe" stroke-width="6" stroke-linecap="round" opacity="0.9"></path>
+  <path d="M106 64l10 14" stroke="#e0f2fe" stroke-width="6" stroke-linecap="round" opacity="0.9"></path>
+
+  <!-- inner shadow-ish ring -->
+  <circle cx="156" cy="128" r="70" fill="none" stroke="#0f172a" stroke-width="6" opacity="0.4"></circle>
+</svg>
